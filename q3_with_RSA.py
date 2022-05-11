@@ -3,13 +3,13 @@ from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 import codecs
-
+import pprint
 key = RSA.generate(1024)
 private_key = key.exportKey()
 public_key = key.public_key()
 public_key = public_key.exportKey()
-print(private_key)
-print(public_key)
+pprint.pprint(private_key)
+pprint.pprint(public_key)
 
 private_key_text = """
 """
@@ -37,16 +37,16 @@ h = SHA256.new(message)
 
 priv_key = RSA.importKey(private_key)
 pub_key = RSA.importKey(public_key)
-print(priv_key)
-print(pub_key)
+pprint.pprint(priv_key)
+pprint.pprint(pub_key)
 singer = pkcs1_15.new(priv_key)
 signature = singer.sign(h)
-print(signature)
+pprint.pprint(signature)
 
 hexify = codecs.getencoder('hex')
 m = hexify(signature)[0]
-print(m)
-
+# print(m)
+pprint.pprint(m)
 try:
     pkcs1_15.new(pub_key).verify(h, signature)
     print("The signature is valid.")
