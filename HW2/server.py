@@ -14,17 +14,11 @@ clients = {}  # key: username, value: client
 users = {}  # key: username, value: User Class
 
 
-def broadcast(message):
-    for client in clients.values():
-        client.send(message)
-
-
 def handle_option(option, client):
     if option == '1':
         string = ' '.join([str(usr) for usr in clients.keys()])
         client.send(string.encode('utf-8'))
         user_choice = client.recv(20).decode('utf-8')
-        print(f'User choice: {user_choice}')
         nicknames = string.strip().split(" ")
         selected_user = users[nicknames[int(user_choice) - 1]]
         # verify public key.
@@ -60,13 +54,14 @@ def handle_client(client):
         # add to system.
         users[username] = user
         clients[username] = client
-        broadcast(f'BROADCAST: {username} has connected to the chat room'.encode('utf-8'))
         client.send('SERVER MESSAGE: you are now connected!'.encode('utf-8'))
         time.sleep(1)
         # redirect user wrt option
-        client.send("select-option".encode('utf-8'))
-        option = client.recv(20).decode('utf-8')
-        handle_option(option, client)
+        while True:
+            client.send("select-option".encode('utf-8'))
+            option = client.recv(20).decode('utf-8')
+            handle_option(option, client)
+
 
 
 
@@ -80,7 +75,6 @@ def handle_client(client):
                 break
         del clients[_user]
         client.close()
-        broadcast(f'{username} has left the chat room!'.encode('utf-8'))
         del users[username]
 
 
