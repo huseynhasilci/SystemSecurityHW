@@ -25,9 +25,6 @@ def handle_option(option, client):
         response = CA.verify_public_key(selected_user.get_certificated_public_key(), selected_user.get_public_key())
         client.send(response)
 
-    elif option == '2':
-        pass
-
 
 # Function to handle clients'connections
 
@@ -61,10 +58,6 @@ def handle_client(client):
             client.send("select-option".encode('utf-8'))
             option = client.recv(20).decode('utf-8')
             handle_option(option, client)
-
-
-
-
     except:
         username = ""
         _user = ""
