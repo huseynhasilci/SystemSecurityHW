@@ -18,10 +18,19 @@ def broadcast(message):
     for client in clients.values():
         client.send(message)
 
+
 def handle_option(option, client):
     if option == '1':
-        
-        pass
+        string = ' '.join([str(usr) for usr in clients.keys()])
+        client.send(string.encode('utf-8'))
+        user_choice = client.recv(20).decode('utf-8')
+        print(f'User choice: {user_choice}')
+        nicknames = string.strip().split(" ")
+        selected_user = users[nicknames[int(user_choice) - 1]]
+        # verify public key.
+        response = CA.verify_public_key(selected_user.get_certificated_public_key(), selected_user.get_public_key())
+        client.send(response)
+
     elif option == '2':
         pass
 
@@ -32,20 +41,22 @@ def handle_option(option, client):
 def handle_client(client):
     try:
         client.send('username'.encode('utf-8'))
-        username = client.recv(1024)
+        username = client.recv(1024).decode('utf-8')
         # check username
         while True:
             is_valid = check_username(username)
             if not is_valid:
                 client.send('invalid-username'.encode('utf-8'))
-                username = client.recv(1024)
+                username = client.recv(1024).decode('utf-8')
                 continue
             break
         # create user with certificated public key.
+        # ---------- PART - 1 --------------------------
         user = User(username)
         user.create_key_pair()
         certificated_public_key = CA.certificate_public_key(username, user.get_public_key())
         user.set_certificated_public_key(certificated_public_key)
+        # -----------------------------------------------
         # add to system.
         users[username] = user
         clients[username] = client
@@ -54,11 +65,10 @@ def handle_client(client):
         time.sleep(1)
         # redirect user wrt option
         client.send("select-option".encode('utf-8'))
-        option = client.recv(20)
+        option = client.recv(20).decode('utf-8')
         handle_option(option, client)
 
-        # verify public key.
-        # CA.verify_public_key(user.get_certificated_public_key(), user.get_public_key())
+
 
     except:
         username = ""
